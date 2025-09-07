@@ -85,6 +85,9 @@ func SuperTestSetting(c yee.Context) (err error) {
 	case "ding":
 		go pusher.PusherMessages(u.Message, pusher.Commontext)
 		return c.JSON(http.StatusOK, common.SuccessPayLoadToMessage(i18n.DefaultLang.Load(i18n.WEBHOOK_TEST)))
+	case "feishu":
+		go pusher.PusherMessages(u.Message, pusher.Commontext)
+		return c.JSON(http.StatusOK, common.SuccessPayLoadToMessage(i18n.DefaultLang.Load(i18n.WEBHOOK_TEST)))
 	case "ldap":
 		ldap := ad.ALdap{Ldap: u.Ldap}
 		k, err := ldap.LdapConnect("", "", true)

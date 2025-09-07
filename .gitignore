@@ -111,3 +111,16 @@ go.sum
 .idea
 
 juno
+
+# 新增：构建产物和临时文件
+Yearning
+*.exe
+test_*.py
+deploy/
+docs/
+*.zip
+*.tar.gz
+.claude/
+docker/data/
+playwright-env/
+.DS_Store

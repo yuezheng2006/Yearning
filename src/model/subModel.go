@@ -37,6 +37,20 @@ type Message struct {
 	Ssl      bool   `json:"ssl"`
 	PushType bool   `json:"push_type"`
 	Key      string `json:"key"`
+	
+	// 新增通用推送配置 - 向后兼容
+	WebHooks       []WebHookConfig `json:"webhooks,omitempty"`        // 多webhook支持
+	TemplateType   string          `json:"template_type,omitempty"`   // "ding", "feishu", "custom"
+	CustomTemplate string          `json:"custom_template,omitempty"` // 自定义模板
+}
+
+type WebHookConfig struct {
+	Name     string `json:"name"`     // "钉钉群", "飞书群", "自定义"
+	URL      string `json:"url"`      // webhook地址
+	Type     string `json:"type"`     // "ding", "feishu", "custom"
+	Secret   string `json:"secret"`   // 签名密钥
+	Template string `json:"template"` // 消息模板
+	Enabled  bool   `json:"enabled"`  // 是否启用
 }
 
 type Ldap struct {

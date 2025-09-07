@@ -53,6 +53,10 @@ func initConfig(cPath string) {
 	if lang != "" {
 		C.General.Lang = lang
 	}
+	// 默认使用中文，如果配置文件中未设置语言
+	if C.General.Lang == "" {
+		C.General.Lang = i18n.CN
+	}
 	i18n.MakeBuild(C.General.Lang)
 	DefaultLogger = logger.LogCreator(int(TransferLogLevel()))
 }
