@@ -61,14 +61,14 @@ var FeishuTemplate = `
                     {
                         "is_short": true,
                         "text": {
-                            "content": "**工单编号:**\n$WORKID",
+                            "content": "**工单编号:**\\n$WORKID",
                             "tag": "lark_md"
                         }
                     },
                     {
                         "is_short": true,
                         "text": {
-                            "content": "**状态:**\n$STATE",
+                            "content": "**状态:**\\n$STATE",
                             "tag": "lark_md"
                         }
                     }
@@ -80,14 +80,14 @@ var FeishuTemplate = `
                     {
                         "is_short": true,
                         "text": {
-                            "content": "**数据源:**\n$SOURCE",
+                            "content": "**数据源:**\\n$SOURCE",
                             "tag": "lark_md"
                         }
                     },
                     {
                         "is_short": true,
                         "text": {
-                            "content": "**提交人员:**\n$USER",
+                            "content": "**提交人员:**\\n$USER",
                             "tag": "lark_md"
                         }
                     }
