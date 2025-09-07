@@ -7,9 +7,11 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -150,10 +152,178 @@ var FeishuTemplate = `
 // 保持向后兼容
 var Commontext = DingTemplate
 
+// 检测webhook类型
+func detectWebhookType(webhookURL string) string {
+	if strings.Contains(webhookURL, "open.feishu.cn") || strings.Contains(webhookURL, "open.larksuite.com") {
+		return "feishu"
+	}
+	// 默认为钉钉类型
+	return "ding"
+}
+
+// 将钉钉格式消息转换为飞书格式
+func convertToFeishuFormat(dingMessage string) string {
+	// 从钉钉JSON中提取关键信息
+	var dingData map[string]interface{}
+	if err := json.Unmarshal([]byte(dingMessage), &dingData); err != nil {
+		// 如果解析失败，返回简单的飞书消息
+		return `{"msg_type": "text", "content": {"text": "Yearning工单通知"}}`
+	}
+	
+	// 提取markdown内容
+	var text string
+	if markdown, ok := dingData["markdown"].(map[string]interface{}); ok {
+		if content, ok := markdown["text"].(string); ok {
+			text = content
+		}
+	}
+	
+	// 解析钉钉markdown内容，提取关键字段
+	workId := extractField(text, "工单编号")
+	source := extractField(text, "数据源")
+	description := extractField(text, "工单说明")
+	user := extractField(text, "提交人员")
+	auditor := extractField(text, "下一步操作人")
+	state := extractField(text, "状态")
+	host := extractField(text, "平台地址")
+	
+	// 构建飞书Interactive Card
+	feishuCard := map[string]interface{}{
+		"msg_type": "interactive",
+		"card": map[string]interface{}{
+			"header": map[string]interface{}{
+				"title": map[string]interface{}{
+					"content": "📋 Yearning工单通知",
+					"tag":     "plain_text",
+				},
+			},
+			"elements": []interface{}{
+				map[string]interface{}{
+					"tag": "div",
+					"text": map[string]interface{}{
+						"content": "**" + auditor + "** 您有新的工单待审批",
+						"tag":     "lark_md",
+					},
+				},
+				map[string]interface{}{"tag": "hr"},
+				map[string]interface{}{
+					"tag": "div",
+					"fields": []interface{}{
+						map[string]interface{}{
+							"is_short": true,
+							"text": map[string]interface{}{
+								"content": "**工单编号:**\\n" + workId,
+								"tag":     "lark_md",
+							},
+						},
+						map[string]interface{}{
+							"is_short": true,
+							"text": map[string]interface{}{
+								"content": "**状态:**\\n" + state,
+								"tag":     "lark_md",
+							},
+						},
+					},
+				},
+				map[string]interface{}{
+					"tag": "div",
+					"fields": []interface{}{
+						map[string]interface{}{
+							"is_short": true,
+							"text": map[string]interface{}{
+								"content": "**数据源:**\\n" + source,
+								"tag":     "lark_md",
+							},
+						},
+						map[string]interface{}{
+							"is_short": true,
+							"text": map[string]interface{}{
+								"content": "**提交人员:**\\n" + user,
+								"tag":     "lark_md",
+							},
+						},
+					},
+				},
+				map[string]interface{}{
+					"tag": "div",
+					"text": map[string]interface{}{
+						"content": "**工单说明:** " + description,
+						"tag":     "lark_md",
+					},
+				},
+				map[string]interface{}{"tag": "hr"},
+				map[string]interface{}{
+					"tag": "action",
+					"actions": []interface{}{
+						map[string]interface{}{
+							"tag": "button",
+							"text": map[string]interface{}{
+								"content": "🔍 查看工单",
+								"tag":     "plain_text",
+							},
+							"type": "primary",
+							"url":  host + "/#/audit/order",
+						},
+						map[string]interface{}{
+							"tag": "button",
+							"text": map[string]interface{}{
+								"content": "📋 立即审核",
+								"tag":     "plain_text",
+							},
+							"type": "default",
+							"url":  host + "/#/audit/order",
+						},
+					},
+				},
+				map[string]interface{}{
+					"tag": "div",
+					"text": map[string]interface{}{
+						"content": "📍 **快速访问:** 点击上方按钮直接跳转\\n⚡ **手动访问:** " + host + "/#/audit/order",
+						"tag":     "lark_md",
+					},
+				},
+				map[string]interface{}{
+					"tag": "note",
+					"elements": []interface{}{
+						map[string]interface{}{
+							"tag":     "plain_text",
+							"content": "⏰ 请及时处理，避免影响业务流程",
+						},
+					},
+				},
+			},
+		},
+	}
+	
+	// 转换为JSON字符串
+	result, _ := json.Marshal(feishuCard)
+	return string(result)
+}
+
+// 从markdown文本中提取字段值
+func extractField(text, fieldName string) string {
+	// 使用正则表达式提取字段值
+	pattern := `\*\*` + fieldName + `:\*\*\s*([^\\n]*)`
+	re := regexp.MustCompile(pattern)
+	matches := re.FindStringSubmatch(text)
+	if len(matches) > 1 {
+		return strings.TrimSpace(matches[1])
+	}
+	return ""
+}
+
 func PusherMessages(msg model.Message, sv string) {
-	// 向后兼容：如果使用旧配置，保持原有逻辑
+	// 向后兼容：如果使用旧配置，智能检测webhook类型
 	if msg.WebHook != "" {
-		sendToWebHook(msg.WebHook, msg.Key, sv, "ding")
+		webhookType := detectWebhookType(msg.WebHook)
+		message := sv
+		
+		// 如果是飞书webhook，需要转换消息格式
+		if webhookType == "feishu" {
+			message = convertToFeishuFormat(sv)
+		}
+		
+		sendToWebHook(msg.WebHook, msg.Key, message, webhookType)
 		return
 	}
 
