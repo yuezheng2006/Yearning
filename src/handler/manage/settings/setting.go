@@ -86,7 +86,7 @@ func SuperTestSetting(c yee.Context) (err error) {
 		go pusher.PusherMessages(u.Message, pusher.Commontext)
 		return c.JSON(http.StatusOK, common.SuccessPayLoadToMessage(i18n.DefaultLang.Load(i18n.WEBHOOK_TEST)))
 	case "feishu":
-		go pusher.PusherMessages(u.Message, pusher.Commontext)
+		go pusher.PusherMessages(u.Message, pusher.FeishuTemplate)
 		return c.JSON(http.StatusOK, common.SuccessPayLoadToMessage(i18n.DefaultLang.Load(i18n.WEBHOOK_TEST)))
 	case "ldap":
 		ldap := ad.ALdap{Ldap: u.Ldap}

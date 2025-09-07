@@ -33,18 +33,28 @@ var DingTemplate = `
 }
 `
 
-// 飞书消息模板
+// 飞书消息模板 - 带可点击按钮
 var FeishuTemplate = `
 {
     "msg_type": "interactive",
     "card": {
         "header": {
             "title": {
-                "content": "Yearning工单通知",
+                "content": "📋 Yearning工单通知",
                 "tag": "plain_text"
             }
         },
         "elements": [
+            {
+                "tag": "div",
+                "text": {
+                    "content": "**$AUDITOR** 您有新的工单待审批",
+                    "tag": "lark_md"
+                }
+            },
+            {
+                "tag": "hr"
+            },
             {
                 "tag": "div",
                 "fields": [
@@ -86,9 +96,51 @@ var FeishuTemplate = `
             {
                 "tag": "div",
                 "text": {
-                    "content": "**下一步操作人:** $AUDITOR\n\n**工单说明:** $TEXT\n\n**平台地址:** $HOST",
+                    "content": "**工单说明:** $TEXT",
                     "tag": "lark_md"
                 }
+            },
+            {
+                "tag": "hr"
+            },
+            {
+                "tag": "action",
+                "actions": [
+                    {
+                        "tag": "button",
+                        "text": {
+                            "content": "🔍 查看工单",
+                            "tag": "plain_text"
+                        },
+                        "type": "primary",
+                        "url": "$HOST/#/audit/order"
+                    },
+                    {
+                        "tag": "button",
+                        "text": {
+                            "content": "📋 立即审核",
+                            "tag": "plain_text"
+                        },
+                        "type": "default",
+                        "url": "$HOST/#/audit/order"
+                    }
+                ]
+            },
+            {
+                "tag": "div",
+                "text": {
+                    "content": "📍 **快速访问:** 点击上方按钮直接跳转\\n⚡ **手动访问:** $HOST/#/audit/order",
+                    "tag": "lark_md"
+                }
+            },
+            {
+                "tag": "note",
+                "elements": [
+                    {
+                        "tag": "plain_text",
+                        "content": "⏰ 请及时处理，避免影响业务流程"
+                    }
+                ]
             }
         ]
     }
