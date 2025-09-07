@@ -147,6 +147,11 @@ func (tpl *OrderTPL) Push() {
 			go PusherMessages(tpl.ll.Message, tpl.pushTpl)
 		}
 	}
+	
+	// 新增：支持多webhook推送
+	if len(model.GloMessage.WebHooks) > 0 {
+		go PusherMessages(tpl.ll.Message, tpl.pushTpl)
+	}
 }
 
 func SendMail(addr string, mail model.Message, tmpl string) {
