@@ -1,0 +1,13 @@
+# Railway ignore file
+.git/
+.claude/
+docker/data/
+docs/
+img/
+playwright-env/
+*.md
+*.zip
+*.tar.gz
+test_*.py
+*.log
+.DS_Store
