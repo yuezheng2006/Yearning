@@ -63,14 +63,14 @@ var FeishuTemplate = `
                     {
                         "is_short": true,
                         "text": {
-                            "content": "**工单编号:**\\n$WORKID",
+                            "content": "**工单编号:** $WORKID",
                             "tag": "lark_md"
                         }
                     },
                     {
                         "is_short": true,
                         "text": {
-                            "content": "**状态:**\\n$STATE",
+                            "content": "**状态:** $STATE",
                             "tag": "lark_md"
                         }
                     }
@@ -82,14 +82,14 @@ var FeishuTemplate = `
                     {
                         "is_short": true,
                         "text": {
-                            "content": "**数据源:**\\n$SOURCE",
+                            "content": "**数据源:** $SOURCE",
                             "tag": "lark_md"
                         }
                     },
                     {
                         "is_short": true,
                         "text": {
-                            "content": "**提交人员:**\\n$USER",
+                            "content": "**提交人员:** $USER",
                             "tag": "lark_md"
                         }
                     }
@@ -131,7 +131,7 @@ var FeishuTemplate = `
             {
                 "tag": "div",
                 "text": {
-                    "content": "📍 **快速访问:** 点击上方按钮直接跳转\\n⚡ **手动访问:** $HOST/#/audit/order",
+                    "content": "📍 **快速访问:** 点击上方按钮直接跳转  \n⚡ **手动访问:** $HOST/#/audit/order",
                     "tag": "lark_md"
                 }
             },
@@ -212,14 +212,14 @@ func convertToFeishuFormat(dingMessage string) string {
 						map[string]interface{}{
 							"is_short": true,
 							"text": map[string]interface{}{
-								"content": "**工单编号:**\\n" + workId,
+								"content": "**工单编号:** " + workId,
 								"tag":     "lark_md",
 							},
 						},
 						map[string]interface{}{
 							"is_short": true,
 							"text": map[string]interface{}{
-								"content": "**状态:**\\n" + state,
+								"content": "**状态:** " + state,
 								"tag":     "lark_md",
 							},
 						},
@@ -231,14 +231,14 @@ func convertToFeishuFormat(dingMessage string) string {
 						map[string]interface{}{
 							"is_short": true,
 							"text": map[string]interface{}{
-								"content": "**数据源:**\\n" + source,
+								"content": "**数据源:** " + source,
 								"tag":     "lark_md",
 							},
 						},
 						map[string]interface{}{
 							"is_short": true,
 							"text": map[string]interface{}{
-								"content": "**提交人员:**\\n" + user,
+								"content": "**提交人员:** " + user,
 								"tag":     "lark_md",
 							},
 						},
@@ -278,7 +278,7 @@ func convertToFeishuFormat(dingMessage string) string {
 				map[string]interface{}{
 					"tag": "div",
 					"text": map[string]interface{}{
-						"content": "📍 **快速访问:** 点击上方按钮直接跳转\\n⚡ **手动访问:** " + host + "/#/audit/order",
+						"content": "📍 **快速访问:** 点击上方按钮直接跳转  \n⚡ **手动访问:** " + host + "/#/audit/order",
 						"tag":     "lark_md",
 					},
 				},
