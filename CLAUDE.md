@@ -86,6 +86,14 @@ go test ./...
 - 集成OpenAI API用于SQL优化和自然语言转SQL
 - 相关代码在`/src/handler/fetch/ai.go`
 
+### 消息推送
+- 支持钉钉(DingTalk)、飞书(Feishu)、自定义Webhook
+- 智能类型检测和消息格式转换
+- 多Webhook配置支持
+- 交互式卡片通知(飞书)
+- 工单状态变化实时推送
+- 相关代码在`/src/lib/pusher/ding.go`
+
 ### 安全特性
 - JWT认证
 - RBAC权限控制

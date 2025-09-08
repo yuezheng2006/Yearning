@@ -404,14 +404,43 @@ func formatMessage(webhook model.WebHookConfig, data string) string {
 // 变量替换辅助函数 - 从已格式化的钉钉消息中提取变量并应用到新模板
 func replaceMessageVariables(template, dingData string) string {
 	// 从钉钉格式的JSON中提取变量值
-	// 这是一个简化实现，实际可能需要更复杂的解析
+	var dingObj map[string]interface{}
+	if err := json.Unmarshal([]byte(dingData), &dingObj); err != nil {
+		model.DefaultLogger.Errorf("解析钉钉消息失败: %v", err)
+		return template
+	}
 	
-	// 由于dingData已经是格式化后的钉钉JSON，我们需要从中提取信息
-	// 为简化实现，这里直接使用模板，实际使用时需要从数据源重新获取变量
+	// 提取markdown内容
+	var markdownText string
+	if markdown, ok := dingObj["markdown"].(map[string]interface{}); ok {
+		if text, ok := markdown["text"].(string); ok {
+			markdownText = text
+		}
+	}
+	
+	if markdownText == "" {
+		return template
+	}
+	
+	// 提取各个变量值
+	workId := extractField(markdownText, "工单编号")
+	source := extractField(markdownText, "数据源")
+	text := extractField(markdownText, "工单说明")
+	user := extractField(markdownText, "提交人员")
+	auditor := extractField(markdownText, "下一步操作人")
+	state := extractField(markdownText, "状态")
+	host := model.GloOther.Domain
+	
+	// 执行变量替换
 	result := template
+	result = strings.Replace(result, "$WORKID", workId, -1)
+	result = strings.Replace(result, "$SOURCE", source, -1)
+	result = strings.Replace(result, "$TEXT", text, -1)
+	result = strings.Replace(result, "$USER", user, -1)
+	result = strings.Replace(result, "$AUDITOR", auditor, -1)
+	result = strings.Replace(result, "$STATE", state, -1)
+	result = strings.Replace(result, "$HOST", host, -1)
 	
-	// 简单的变量替换（实际应该从原始数据源获取）
-	// 这里为了演示，先返回模板本身，实际部署时需要完善
 	return result
 }
 
