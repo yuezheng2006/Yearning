@@ -115,7 +115,7 @@ var FeishuTemplate = `
                             "tag": "plain_text"
                         },
                         "type": "primary",
-                        "url": "$HOST/#/audit/order"
+                        "url": "$HOST/#/server/order/audit/list"
                     },
                     {
                         "tag": "button",
@@ -124,7 +124,7 @@ var FeishuTemplate = `
                             "tag": "plain_text"
                         },
                         "type": "default",
-                        "url": "$HOST/#/audit/order"
+                        "url": "$HOST/#/server/order/audit/list"
                     }
                 ]
             },
@@ -262,7 +262,7 @@ func convertToFeishuFormat(dingMessage string) string {
 								"tag":     "plain_text",
 							},
 							"type": "primary",
-							"url":  host + "/#/audit/order",
+							"url":  host + "/#/server/order/audit/list",
 						},
 						map[string]interface{}{
 							"tag": "button",
@@ -271,7 +271,7 @@ func convertToFeishuFormat(dingMessage string) string {
 								"tag":     "plain_text",
 							},
 							"type": "default",
-							"url":  host + "/#/audit/order",
+							"url":  host + "/#/server/order/audit/list",
 						},
 					},
 				},
