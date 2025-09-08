@@ -131,7 +131,7 @@ var FeishuTemplate = `
             {
                 "tag": "div",
                 "text": {
-                    "content": "📍 **快速访问:** 点击上方按钮直接跳转  \n⚡ **手动访问:** $HOST/#/audit/order",
+                    "content": "📍 点击按钮直接跳转到审核页面",
                     "tag": "lark_md"
                 }
             },
@@ -140,7 +140,7 @@ var FeishuTemplate = `
                 "elements": [
                     {
                         "tag": "plain_text",
-                        "content": "⏰ 请及时处理，避免影响业务流程"
+                        "content": "请及时处理工单"
                     }
                 ]
             }
@@ -278,7 +278,7 @@ func convertToFeishuFormat(dingMessage string) string {
 				map[string]interface{}{
 					"tag": "div",
 					"text": map[string]interface{}{
-						"content": "📍 **快速访问:** 点击上方按钮直接跳转  \n⚡ **手动访问:** " + host + "/#/audit/order",
+						"content": "📍 点击按钮直接跳转到审核页面",
 						"tag":     "lark_md",
 					},
 				},
@@ -287,7 +287,7 @@ func convertToFeishuFormat(dingMessage string) string {
 					"elements": []interface{}{
 						map[string]interface{}{
 							"tag":     "plain_text",
-							"content": "⏰ 请及时处理，避免影响业务流程",
+							"content": "请及时处理工单",
 						},
 					},
 				},
