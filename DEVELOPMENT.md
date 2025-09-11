@@ -138,16 +138,12 @@ Lang = "zh_CN"
 - **状态管理**: Vuex
 - **HTTP客户端**: Axios
 
-### 设置前端代码
+### 前端代码
 
-1. **获取前端源码**:
-   ```bash
-   # 选项1: 克隆官方前端仓库
-   git clone https://github.com/cookieY/Yearning-gemini.git frontend-dev
-   
-   # 选项2: 使用内置的基础前端模板
-   ./dev-start.sh start  # 会自动创建基础模板
-   ```
+前端使用官方仓库 [Yearning-gemini](https://github.com/cookieY/Yearning-gemini/)：
+- **自动获取**: Docker构建时自动克隆最新代码
+- **技术栈**: Vue 2 + TypeScript + Element UI
+- **无需手动配置**: 开发环境自动处理
 
 2. **启动前端开发**:
    ```bash

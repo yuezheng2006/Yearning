@@ -1,5 +1,5 @@
-# 前端开发环境Dockerfile
-FROM node:18-alpine
+# 前端开发环境Dockerfile - 使用官方Yearning-gemini
+FROM node:16-alpine
 
 # 安装开发工具
 RUN apk add --no-cache git bash curl
@@ -7,61 +7,29 @@ RUN apk add --no-cache git bash curl
 # 设置工作目录
 WORKDIR /app
 
-# 全局安装开发工具
-RUN npm install -g @vue/cli @vue/cli-service-global vite
+# 克隆官方前端仓库
+RUN git clone https://github.com/cookieY/Yearning-gemini.git .
 
 # 设置npm镜像源
 RUN npm config set registry https://registry.npmmirror.com
 
-# 创建前端项目结构
-RUN mkdir -p /app/src /app/public
+RUN npm install
 
-# 创建package.json
-RUN cat > /app/package.json << 'EOF'
-{
-  "name": "yearning-frontend-dev",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "serve": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
-  },
-  "dependencies": {
-    "vue": "^3.3.4",
-    "vue-router": "^4.2.4",
-    "vuex": "^4.0.2",
-    "axios": "^1.4.0",
-    "element-plus": "^2.3.8",
-    "@element-plus/icons-vue": "^2.1.0",
-    "echarts": "^5.4.2",
-    "monaco-editor": "^0.39.0"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^4.2.3",
-    "vite": "^4.4.0",
-    "eslint": "^8.45.0",
-    "eslint-plugin-vue": "^9.15.1",
-    "@vue/eslint-config-prettier": "^8.0.0",
-    "prettier": "^3.0.0"
-  }
-}
-EOF
+# 修改开发服务器配置为5001端口
+RUN if [ -f "vue.config.js" ]; then \
+    sed -i "s/port: [0-9]*/port: 5001/g" vue.config.js; \
+    fi
 
-# 创建vite配置文件
-RUN cat > /app/vite.config.js << 'EOF'
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+# 如果有vite.config.js，也需要修改
+RUN if [ -f "vite.config.js" ]; then \
+    sed -i "s/port: [0-9]*/port: 5001/g" vite.config.js; \
+    fi
 
-export default defineConfig({
-  plugins: [vue()],
-  server: {
-    host: '0.0.0.0',
-    port: 3000,
-    hmr: {
-      port: 3001
-    },
+# 创建或修改API代理配置
+RUN cat > /app/proxy.config.js << 'EOF'
+module.exports = {
+  devServer: {
+    port: 5001,
     proxy: {
       '/api': {
         target: 'http://backend-dev:8000',
@@ -77,261 +45,11 @@ export default defineConfig({
         changeOrigin: true
       }
     }
-  },
-  build: {
-    outDir: '../src/service/dist',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['vue', 'vue-router', 'vuex'],
-          element: ['element-plus']
-        }
-      }
-    }
-  }
-})
-EOF
-
-# 创建基础的Vue应用
-RUN cat > /app/index.html << 'EOF'
-<!DOCTYPE html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="/vite.svg">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yearning SQL审核平台 - 开发环境</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
-</html>
-EOF
-
-RUN cat > /app/src/main.js << 'EOF'
-import { createApp } from 'vue'
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
-import App from './App.vue'
-import router from './router'
-import store from './store'
-
-const app = createApp(App)
-
-app.use(ElementPlus)
-app.use(router)
-app.use(store)
-
-app.mount('#app')
-EOF
-
-RUN cat > /app/src/App.vue << 'EOF'
-<template>
-  <div id="app">
-    <el-container>
-      <el-header>
-        <h1>Yearning SQL审核平台 - 开发环境</h1>
-      </el-header>
-      <el-main>
-        <router-view />
-      </el-main>
-    </el-container>
-  </div>
-</template>
-
-<script>
-export default {
-  name: 'App'
-}
-</script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-}
-
-.el-header {
-  background-color: #B3C0D1;
-  color: #333;
-  text-align: center;
-  line-height: 60px;
-}
-
-.el-main {
-  background-color: #E9EEF3;
-  color: #333;
-  text-align: center;
-}
-</style>
-EOF
-
-RUN cat > /app/src/router/index.js << 'EOF'
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-
-const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: Home
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('../views/Login.vue')
-  }
-]
-
-const router = createRouter({
-  history: createWebHistory(),
-  routes
-})
-
-export default router
-EOF
-
-RUN cat > /app/src/store/index.js << 'EOF'
-import { createStore } from 'vuex'
-
-export default createStore({
-  state: {
-    user: null,
-    token: null
-  },
-  getters: {
-  },
-  mutations: {
-    SET_USER(state, user) {
-      state.user = user
-    },
-    SET_TOKEN(state, token) {
-      state.token = token
-    }
-  },
-  actions: {
-  },
-  modules: {
-  }
-})
-EOF
-
-RUN mkdir -p /app/src/views
-
-RUN cat > /app/src/views/Home.vue << 'EOF'
-<template>
-  <div class="home">
-    <h1>欢迎使用 Yearning SQL审核平台</h1>
-    <p>这是开发环境，前后端已分离</p>
-    <el-button type="primary" @click="testAPI">测试API连接</el-button>
-    <div v-if="apiResult" class="api-result">
-      <h3>API测试结果：</h3>
-      <pre>{{ apiResult }}</pre>
-    </div>
-  </div>
-</template>
-
-<script>
-import axios from 'axios'
-
-export default {
-  name: 'Home',
-  data() {
-    return {
-      apiResult: null
-    }
-  },
-  methods: {
-    async testAPI() {
-      try {
-        const response = await axios.get('/api/v2/common/info')
-        this.apiResult = response.data
-      } catch (error) {
-        this.apiResult = { error: error.message }
-      }
-    }
   }
 }
-</script>
-
-<style scoped>
-.home {
-  padding: 20px;
-}
-
-.api-result {
-  margin-top: 20px;
-  text-align: left;
-}
-
-pre {
-  background: #f5f5f5;
-  padding: 10px;
-  border-radius: 4px;
-}
-</style>
 EOF
 
-RUN cat > /app/src/views/Login.vue << 'EOF'
-<template>
-  <div class="login">
-    <el-card class="login-card">
-      <h2>登录</h2>
-      <el-form :model="loginForm" @submit="handleLogin">
-        <el-form-item>
-          <el-input v-model="loginForm.username" placeholder="用户名" />
-        </el-form-item>
-        <el-form-item>
-          <el-input v-model="loginForm.password" type="password" placeholder="密码" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleLogin">登录</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
-  </div>
-</template>
+EXPOSE 5001
 
-<script>
-export default {
-  name: 'Login',
-  data() {
-    return {
-      loginForm: {
-        username: 'admin',
-        password: 'Yearning_admin'
-      }
-    }
-  },
-  methods: {
-    handleLogin() {
-      // 登录逻辑
-      console.log('登录表单:', this.loginForm)
-    }
-  }
-}
-</script>
-
-<style scoped>
-.login {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.login-card {
-  width: 400px;
-}
-</style>
-EOF
-
-# 安装依赖
-RUN npm install
-
-EXPOSE 3000 3001
-
+# 使用官方前端的启动命令
 CMD ["npm", "run", "serve"]

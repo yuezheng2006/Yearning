@@ -41,7 +41,7 @@ check_docker() {
 
 # 检查端口是否被占用
 check_ports() {
-    local ports=("80" "3000" "8000" "3306" "2345")
+    local ports=("80" "5000" "8000" "3306" "2345")
     for port in "${ports[@]}"; do
         if lsof -ti:$port > /dev/null 2>&1; then
             log_warn "端口 $port 已被占用"
@@ -54,15 +54,11 @@ check_ports() {
     done
 }
 
-# 创建前端开发目录
+# 检查前端环境
 setup_frontend() {
-    if [ ! -d "frontend-dev" ]; then
-        log_info "创建前端开发目录..."
-        mkdir -p frontend-dev
-        # 这里可以从 Yearning-gemini 仓库克隆或复制前端代码
-        log_info "前端开发目录已创建: ./frontend-dev"
-        log_warn "请将前端源码放置在 ./frontend-dev 目录中"
-    fi
+    log_info "前端使用官方Yearning-gemini仓库"
+    log_info "源码地址: https://github.com/cookieY/Yearning-gemini"
+    log_info "Docker构建时会自动克隆最新代码"
 }
 
 # 启动完整开发环境
@@ -87,7 +83,7 @@ start_dev() {
     echo
     log_info "访问地址："
     echo "  🌐 完整应用 (Nginx代理): http://localhost"
-    echo "  🔧 前端开发服务器: http://localhost:3000"
+    echo "  🔧 前端开发服务器: http://localhost:5000"
     echo "  🔌 后端API服务器: http://localhost:8000"
     echo "  🗄️  MySQL数据库: localhost:3306"
     echo "  🐛 Go调试端口: localhost:2345"
@@ -127,7 +123,7 @@ start_frontend() {
     docker-compose -f docker-compose.dev.yml up --build frontend-dev -d
     
     log_info "前端开发环境已启动"
-    echo "  🔧 前端开发服务器: http://localhost:3000"
+    echo "  🔧 前端开发服务器: http://localhost:5000"
 }
 
 # 停止开发环境
@@ -191,7 +187,7 @@ show_status() {
     
     echo
     echo "端口使用情况:"
-    local ports=("80" "3000" "8000" "3306" "2345")
+    local ports=("80" "5000" "8000" "3306" "2345")
     for port in "${ports[@]}"; do
         if lsof -ti:$port > /dev/null 2>&1; then
             echo "  端口 $port: 🔴 使用中"

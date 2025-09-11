@@ -66,21 +66,16 @@ services:
         dlv debug --headless --listen=:2345 --api-version=2 --accept-multiclient . -- run --port 8000
       "
 
-  # 前端开发服务
+  # 前端开发服务 (使用官方Yearning-gemini仓库)
   frontend-dev:
     build:
       context: .
       dockerfile: Dockerfile.frontend-dev
     container_name: yearning-frontend-dev
     ports:
-      - "3000:3000"  # 前端开发服务器端口
-      - "3001:3001"  # 前端热重载端口
-    volumes:
-      - ./frontend-dev:/app  # 前端源码目录
-      - /app/node_modules    # 缓存node_modules
+      - "5001:5001"  # 前端开发服务器端口
     environment:
-      - CHOKIDAR_USEPOLLING=true
-      - REACT_APP_API_URL=http://localhost:8000
+      - VUE_APP_API_URL=http://localhost:8000
     networks:
       - yearning-dev
     restart: unless-stopped
@@ -111,7 +106,7 @@ networks:
     driver: bridge
 
 # 开发环境说明：
-# - 前端开发服务器: http://localhost:3000 (热重载)
+# - 前端开发服务器: http://localhost:5000
 # - 后端API服务器: http://localhost:8000 (Go调试)
 # - 完整应用代理: http://localhost (Nginx整合)
 # - MySQL数据库: localhost:3306
