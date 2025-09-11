@@ -111,3 +111,13 @@ go.sum
 .idea
 
 juno
+# 构建产物
+Yearning
+build/
+dist/
+*.exe
+
+# 开发环境
+frontend-dev/
+*.log
+conf.toml
