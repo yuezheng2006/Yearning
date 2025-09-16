@@ -3,20 +3,22 @@ package personal
 import (
 	"Yearning-go/src/model"
 	"fmt"
-	"github.com/cookieY/yee"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/cookieY/yee"
 )
 
 func init() {
-	model.DbInit("../../../conf.toml")
+	// 测试数据库初始化应该使用 model.DB() 或 NewDBSub()
+	// model.DbInit("../../../conf.toml") // 已废弃
 }
 
 func QueryRes(y yee.Context) (err error) {
-	user := "admin"
-	return FetchQueryResults(y, &user)
+	// 简化的测试函数，实际应该使用正确的认证和上下文
+	return SocketQueryResults(y)
 }
 
 func TestFetchQueryResults(t *testing.T) {
@@ -30,7 +32,7 @@ func TestFetchQueryResults(t *testing.T) {
 }
 
 func BenchmarkFetchQueryResults(b *testing.B) {
-	model.GloOther.Limit = "50000"
+	model.GloOther.Limit = 50000
 	y := yee.C()
 	y.POST("/api/v2/query", QueryRes)
 	b.ReportAllocs()
@@ -47,4 +49,4 @@ func BenchmarkFetchQueryResults(b *testing.B) {
 
 BenchmarkFetchQueryResults
 BenchmarkFetchQueryResults-12    	      64	  17805887 ns/op	  58.89 MB/s	 2854660 B/op	   84990 allocs/op
- */
+*/

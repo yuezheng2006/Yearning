@@ -38,7 +38,7 @@
 
 ## ⚙️ 安装
 
-下载 [最新发布](https://github.com/cookieY/Yearning/releases/latest) 并解压。在继续之前，请确保已配置 `./config.toml`。
+下载 [最新发布](https://github.com/cookieY/Yearning/releases/latest) 并解压。在继续之前，请确保已配置 `./conf.toml`。
 
 ### 手动安装
 
@@ -52,6 +52,83 @@
 ## 帮助
 ./Yearning --help
 ```
+
+### 📦 源码编译 (前后端一体化)
+
+如果你想从源码编译 Yearning，可以使用我们提供的一体化构建脚本：
+
+```bash
+## 克隆项目
+git clone https://github.com/cookieY/Yearning.git
+cd Yearning
+
+## 一键构建 (自动构建前端 + 编译后端)
+./build.sh
+
+## 配置文件
+cp conf.toml.template conf.toml
+# 编辑 conf.toml 配置数据库连接等信息
+
+## 初始化数据库
+./Yearning install
+
+## 启动服务
+./Yearning run
+```
+
+**构建说明：**
+- 自动检测是否需要构建前端，如果没有前端资源会自动调用 `./build-frontend.sh`
+- 前端代码会被嵌入到 Go 二进制文件中，实现前后端一体化部署
+- 支持交叉编译，在非 Linux 环境会自动编译 Linux 版本
+- 最终产出单个二进制文件，包含完整的前后端功能
+
+**目录结构：**
+```
+Yearning/
+├── frontend/           # 前端源码 (gemini-next)
+├── src/service/dist/   # 前端构建产物 (嵌入到 Go 二进制)
+├── build.sh           # 后端构建脚本
+├── build-frontend.sh   # 前端构建脚本
+└── Yearning           # 最终二进制文件
+```
+
+### 🔧 二次开发
+
+如果你需要进行前端二次开发，推荐以下流程：
+
+```bash
+## 1. 克隆并进入项目
+git clone https://github.com/cookieY/Yearning.git
+cd Yearning
+
+## 2. 前端代码已经包含在 frontend/ 目录中
+## 你可以直接修改 frontend/ 目录下的源码
+
+## 3. 安装前端依赖（仅第一次需要）
+cd frontend
+npm install --legacy-peer-deps
+cd ..
+
+## 4. 开发模式启动前端（可选）
+cd frontend
+npm run dev  # 启动开发服务器，支持热更新
+cd ..
+
+## 5. 构建前端（修改后必须）
+./build-frontend.sh
+
+## 6. 构建后端一体化应用
+./build.sh
+
+## 7. 部署
+./Yearning install  # 首次安装
+./Yearning run      # 启动服务
+```
+
+**开发注意事项：**
+- 前端修改后必须重新运行 `./build-frontend.sh` 构建
+- 前端构建完成后需要运行 `./build.sh` 重新编译后端
+- 最终部署的是包含前端资源的单个二进制文件
 
 ### 🚀 使用 Docker 部署
 [![][docker-release-shield]][docker-release-link]

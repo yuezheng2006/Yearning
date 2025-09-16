@@ -41,7 +41,7 @@ check_docker() {
 
 # 检查端口是否被占用
 check_ports() {
-    local ports=("80" "5000" "8000" "3306" "2345")
+    local ports=("80" "5001" "9900" "8000" "3307" "2345")
     for port in "${ports[@]}"; do
         if lsof -ti:$port > /dev/null 2>&1; then
             log_warn "端口 $port 已被占用"
@@ -83,7 +83,7 @@ start_dev() {
     echo
     log_info "访问地址："
     echo "  🌐 完整应用 (Nginx代理): http://localhost"
-    echo "  🔧 前端开发服务器: http://localhost:5000"
+    echo "  🔧 前端开发服务器: http://localhost:5001"
     echo "  🔌 后端API服务器: http://localhost:8000"
     echo "  🗄️  MySQL数据库: localhost:3306"
     echo "  🐛 Go调试端口: localhost:2345"
@@ -123,7 +123,7 @@ start_frontend() {
     docker-compose -f docker-compose.dev.yml up --build frontend-dev -d
     
     log_info "前端开发环境已启动"
-    echo "  🔧 前端开发服务器: http://localhost:5000"
+    echo "  🔧 前端开发服务器: http://localhost:5001"
 }
 
 # 停止开发环境

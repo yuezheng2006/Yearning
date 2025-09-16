@@ -38,9 +38,9 @@ English | [简体中文](README.zh-CN.md) | [日本語](README.ja-JP.md)
 
 ## ⚙️ Installation
 
-Download the [latest release](https://github.com/cookieY/Yearning/releases/latest) and extract it. Ensure you have configured `./config.toml` before proceeding.
+### 🚀 Quick Start (Binary Release)
 
-### Manual Installation
+Download the [latest release](https://github.com/cookieY/Yearning/releases/latest) and extract it. Ensure you have configured `./config.toml` before proceeding.
 
 ```bash
 ## Initialize the database
@@ -51,6 +51,34 @@ Download the [latest release](https://github.com/cookieY/Yearning/releases/lates
 
 ## Help
 ./Yearning --help
+```
+
+### 🔨 Build from Source (Frontend + Backend)
+
+```bash
+## 1. Build integrated application (Frontend + Backend)
+./build.sh
+
+## 2. Configure database
+cp conf.toml.template conf.toml
+# Edit conf.toml to set MySQL connection
+
+## 3. Initialize database  
+./Yearning install
+
+## 4. Start service
+./Yearning run
+```
+
+### 🎨 Frontend Development
+
+```bash
+## Build frontend only (Vue3 + Vite)
+./build-frontend.sh
+
+## For frontend development with hot reload
+cd ~/workspace/yearning-frontend
+npm run dev  # Visit http://localhost:5173
 ```
 
 ### 🚀 Deploying with Docker
