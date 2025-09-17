@@ -39,7 +39,7 @@ Host = "127.0.0.1"
 - **必填**: ✅ 是
 - **示例**: 
   - `"127.0.0.1"` - 本地数据库
-  - `"10.10.106.42"` - 内网数据库
+  - `"192.168.1.100"` - 内网数据库
   - `"mysql.example.com"` - 域名访问
 - **注意事项**:
   - 确保网络连通性
@@ -54,7 +54,7 @@ Port = "3306"
 - **类型**: 字符串（注意是字符串格式）
 - **必填**: ✅ 是
 - **默认值**: `"3306"`
-- **示例**: `"3306"`, `"13306"`, `"33060"`
+- **示例**: `"3306"`, `"33306"`, `"33060"`
 - **注意事项**:
   - 端口号用引号包围
   - 确保端口未被其他服务占用
@@ -81,7 +81,7 @@ Password = "your_password"
 - **类型**: 字符串
 - **必填**: ✅ 是
 - **支持格式**:
-  - **明文密码**: `"ktvsky5166"`
+  - **明文密码**: `"your_password_123"`
   - **AES加密**: `"encrypted_base64_string"`
 - **加密说明**:
   - 系统会自动尝试使用SecretKey解密
@@ -98,7 +98,7 @@ Password = "your_password"
 
 ### SecretKey
 ```toml
-SecretKey = "dbcjqheupqjsuwsm"
+SecretKey = "your_16char_key!"
 ```
 - **说明**: 系统加密密钥
 - **类型**: 字符串
@@ -202,7 +202,7 @@ ClientId = "yearning"
 
 ### ClientSecret
 ```toml
-ClientSecret = "your_client_secret"
+ClientSecret = "your_oidc_client_secret"
 ```
 - **说明**: OIDC客户端密钥
 - **类型**: 字符串
@@ -222,7 +222,7 @@ Scope = "openid profile"
 
 ### AuthUrl
 ```toml
-AuthUrl = "https://keycloak.xxx.ca/auth/realms/master/protocol/openid-connect/auth"
+AuthUrl = "https://sso.example.com/auth/realms/master/protocol/openid-connect/auth"
 ```
 - **说明**: OIDC认证端点
 - **类型**: 字符串（URL）
@@ -230,7 +230,7 @@ AuthUrl = "https://keycloak.xxx.ca/auth/realms/master/protocol/openid-connect/au
 
 ### TokenUrl
 ```toml
-TokenUrl = "https://keycloak.xxx.ca/auth/realms/master/protocol/openid-connect/token"
+TokenUrl = "https://sso.example.com/auth/realms/master/protocol/openid-connect/token"
 ```
 - **说明**: OIDC令牌端点
 - **类型**: 字符串（URL）
@@ -238,7 +238,7 @@ TokenUrl = "https://keycloak.xxx.ca/auth/realms/master/protocol/openid-connect/t
 
 ### UserUrl
 ```toml
-UserUrl = "https://keycloak.xxx.ca/auth/realms/master/protocol/openid-connect/userinfo"
+UserUrl = "https://sso.example.com/auth/realms/master/protocol/openid-connect/userinfo"
 ```
 - **说明**: OIDC用户信息端点
 - **类型**: 字符串（URL）
@@ -246,7 +246,7 @@ UserUrl = "https://keycloak.xxx.ca/auth/realms/master/protocol/openid-connect/us
 
 ### RedirectUrL
 ```toml
-RedirectUrL = "http://127.0.0.1:8000/oidc/_token-login"
+RedirectUrL = "http://yearning.example.com:8000/oidc/_token-login"
 ```
 - **说明**: OIDC回调地址
 - **类型**: 字符串（URL）
