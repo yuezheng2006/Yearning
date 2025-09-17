@@ -27,12 +27,9 @@ systemctl status mariadb
 sudo mkdir -p /opt/yearning
 cd /opt/yearning
 
-# 下载最新版本
-wget https://github.com/cookieY/Yearning/releases/download/v20250917/yearning-deployment-package.tar.gz
-
-# 解压部署包
-tar -xzf yearning-deployment-package.tar.gz
-cd yearning-deployment-package
+# 克隆定制版本仓库（包含Juno问题修复和生产环境优化）
+git clone https://github.com/yuezheng2006/Yearning.git
+cd Yearning/yearning-deployment-package
 
 # 解压Linux生产环境二进制包
 tar -xzf yearning-v20250917-72d84e6-linux-amd64.tar.gz

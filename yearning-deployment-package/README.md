@@ -51,9 +51,9 @@ yearning-deployment-package/
 
 **快速启动**：
 ```bash
-# 1. 下载并解压
-wget https://github.com/your-repo/yearning/releases/download/v20250917/yearning-deployment-package.tar.gz
-tar -xzf yearning-deployment-package.tar.gz && cd yearning-deployment-package
+# 1. 克隆仓库
+git clone https://github.com/yuezheng2006/Yearning.git
+cd Yearning/yearning-deployment-package
 tar -xzf yearning-v20250917-72d84e6-linux-amd64.tar.gz && cd yearning-v20250917-72d84e6-linux-amd64
 
 # 2. 配置和启动（详细步骤见Linux生产环境指南）
@@ -77,10 +77,9 @@ chmod +x quick-mac-test.sh
 ### 方式二：自动化脚本部署
 
 ```bash
-# 下载并解压部署包
-wget https://github.com/your-repo/yearning/releases/download/v20250917/yearning-deployment-package.tar.gz
-tar -xzf yearning-deployment-package.tar.gz
-cd yearning-deployment-package
+# 克隆仓库获取部署包
+git clone https://github.com/yuezheng2006/Yearning.git
+cd Yearning/yearning-deployment-package
 
 # 运行自动化部署脚本
 chmod +x deploy-production.sh

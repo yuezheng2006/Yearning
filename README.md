@@ -46,10 +46,9 @@ Download the [latest release](https://github.com/cookieY/Yearning/releases/lates
 **Git Commit**: 72d84e66453fb9f94d22da4608e4d785374351a8
 
 ```bash
-# 1. Download and extract deployment package
-wget https://github.com/cookieY/Yearning/releases/download/v20250917/yearning-deployment-package.tar.gz
-tar -xzf yearning-deployment-package.tar.gz
-cd yearning-deployment-package
+# 1. Clone repository to get deployment package
+git clone https://github.com/yuezheng2006/Yearning.git
+cd Yearning/yearning-deployment-package
 
 # 2. Extract Linux binary package
 tar -xzf yearning-v20250917-72d84e6-linux-amd64.tar.gz
@@ -102,10 +101,9 @@ chmod +x quick-mac-test.sh
 #### Automated Script Deployment
 
 ```bash
-# Download and extract deployment package
-wget https://github.com/cookieY/Yearning/releases/download/v20250917/yearning-deployment-package.tar.gz
-tar -xzf yearning-deployment-package.tar.gz
-cd yearning-deployment-package
+# Clone repository to get deployment package
+git clone https://github.com/yuezheng2006/Yearning.git
+cd Yearning/yearning-deployment-package
 
 # Run automated deployment script
 chmod +x deploy-production.sh
