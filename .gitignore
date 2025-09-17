@@ -111,3 +111,51 @@ go.sum
 .idea
 
 juno
+# 构建产物
+Yearning
+build/
+dist/
+*.exe
+
+# 开发环境
+frontend-dev/
+*.log
+conf.toml
+
+# 部署和构建相关
+# *-deployment/  # 注释掉以允许 yearning-deployment-package
+playwright-env/
+mac-test-deployment/
+
+# 部署包中的二进制文件（保留文档和脚本）
+# yearning-deployment-package/*.tar.gz
+# yearning-deployment-package/*.zip
+# yearning-deployment-package/*.sha256
+yearning-deployment-package/mac-test-deployment/
+
+# 临时文件和构建产物
+Yearning-*
+yearning-linux
+Dockerfile.simple
+# 全局二进制文件规则（但不影响部署包内的文档）
+/yearning
+*.tar.gz
+*.zip
+*.sha256
+
+# 脚本和配置文件副本
+docker-compose.*.yml
+build-*.sh
+deploy-*.sh
+*-test.sh
+
+# Python环境
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node.js (如果有前端开发)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

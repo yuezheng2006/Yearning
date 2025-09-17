@@ -20,10 +20,11 @@ import (
 	"Yearning-go/src/model"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/gookit/gcli/v3/interact"
 	"os"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/gookit/gcli/v3/interact"
 )
 
 var SQLPrompt = `
@@ -227,9 +228,10 @@ func Migrate() {
 			DDLEnablePrimaryKey:            false,
 		}
 
+		// 其他配置
 		other := model.Other{
 			Limit:       1000,
-			IDC:         []string{"Aliyun", "AWS"},
+			IDC:         []string{"Local", "Aliyun", "AWS"},
 			Query:       false,
 			Register:    false,
 			Export:      false,

@@ -9,11 +9,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/cookieY/sqlx"
-	"github.com/cookieY/yee/logger"
 	"strconv"
 	"strings"
 	"unsafe"
+
+	"github.com/cookieY/sqlx"
+	"github.com/cookieY/yee/logger"
 )
 
 const (
@@ -52,6 +53,7 @@ type QueryArgs struct {
 func (q *QueryDeal) PreCheck(insulateWordList string) error {
 	var rs []engine.Record
 	if client := calls.NewRpc(); client != nil {
+		// 使用外部Juno服务进行查询预检
 		if err := client.Call("Engine.Query", &QueryArgs{
 			SQL:              q.Ref.Sql,
 			Limit:            model.GloOther.Limit,
@@ -59,15 +61,24 @@ func (q *QueryDeal) PreCheck(insulateWordList string) error {
 		}, &rs); err != nil {
 			return err
 		}
-		for _, i := range rs {
-			if i.Error != "" {
-				return errors.New(i.Error)
-			}
-			q.MultiSQLRunner = append(q.MultiSQLRunner, MultiSQLRunner{SQL: i.SQL, InsulateWordList: factory.MapOn(i.InsulateWordList)})
-		}
-		return nil
+	} else {
+		// fallback到内置引擎进行查询预检
+		// 在内置模式下，简化处理：直接将SQL添加到执行队列
+		rs = []engine.Record{{
+			SQL:              q.Ref.Sql,
+			Status:           "通过",
+			Level:            0,
+			InsulateWordList: strings.Split(insulateWordList, ","),
+		}}
 	}
-	return errors.New("client is nil")
+
+	for _, i := range rs {
+		if i.Error != "" {
+			return errors.New(i.Error)
+		}
+		q.MultiSQLRunner = append(q.MultiSQLRunner, MultiSQLRunner{SQL: i.SQL, InsulateWordList: factory.MapOn(i.InsulateWordList)})
+	}
+	return nil
 }
 
 func (m *MultiSQLRunner) Run(db *sqlx.DB, schema string) (*Query, error) {

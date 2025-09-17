@@ -6,10 +6,11 @@ import (
 	"Yearning-go/src/test"
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func setup() {
@@ -45,7 +46,7 @@ func TestTplPostSourceTemplate(t *testing.T) {
 	var Ref common.Resp
 	args := `{"steps":[{"desc": "提交阶段", "type": 0, "auditor": ["提交人"]}, {"desc": "321", "type": 1, "auditor": ["admin", "hj"]}],"source":"test"}`
 	apis.Post(args).Do().Unmarshal(&Ref)
-	assert.Equal(t, common.DATA_IS_UPDATED, Ref.Text)
+	assert.Equal(t, "数据已更新!", Ref.Text)
 
 	args = `{"steps":[{"desc": "提交阶段", "type": 0, "auditor": ["提交人"]}, {"desc": "321", "type": 2, "auditor": ["admin", "hj"]}],"source":"test"}`
 	apis.Post(args).Do().Unmarshal(&Ref)

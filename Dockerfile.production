@@ -1,0 +1,184 @@
+# Yearning SQL审计平台 - 生产环境Dockerfile
+# 版本: v1.0.0
+# 作者: Yearning Team
+# 更新时间: 2025-09-17
+
+# 构建阶段
+FROM golang:1.21-alpine AS builder
+
+# 设置工作目录
+WORKDIR /app
+
+# 安装构建依赖
+RUN apk add --no-cache git gcc musl-dev bash
+
+# 设置Go环境
+ENV GO111MODULE=on \
+    GOPROXY=https://goproxy.cn,direct \
+    CGO_ENABLED=1 \
+    GOOS=linux
+
+# 复制go模块文件
+COPY go.mod go.sum ./
+
+# 下载依赖
+RUN go mod download && go mod verify
+
+# 复制源代码
+COPY . .
+
+# 构建应用
+ARG BUILD_VERSION=latest
+ARG BUILD_TIME
+ARG GIT_COMMIT
+
+RUN go build \
+    -ldflags "-w -s -X 'main.Version=${BUILD_VERSION}' -X 'main.BuildTime=${BUILD_TIME}' -X 'main.GitCommit=${GIT_COMMIT}'" \
+    -o yearning \
+    main.go
+
+# 运行阶段
+FROM alpine:3.18
+
+# 安装运行时依赖
+RUN apk add --no-cache \
+    ca-certificates \
+    tzdata \
+    curl \
+    bash \
+    mysql-client \
+    && rm -rf /var/cache/apk/*
+
+# 设置时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# 创建应用用户
+RUN addgroup -g 1000 yearning && \
+    adduser -D -s /bin/bash -u 1000 -G yearning yearning
+
+# 设置工作目录
+WORKDIR /app
+
+# 创建必要的目录
+RUN mkdir -p /app/{conf,logs,data} && \
+    chown -R yearning:yearning /app
+
+# 从构建阶段复制二进制文件
+COPY --from=builder /app/yearning /app/yearning
+
+# 复制配置文件模板
+COPY conf.toml.template /app/conf/
+
+# 创建启动脚本
+RUN cat > /app/entrypoint.sh << 'EOF'
+#!/bin/bash
+set -e
+
+# 等待MySQL就绪
+wait_for_mysql() {
+    echo "等待MySQL服务就绪..."
+    local retries=30
+    while [ $retries -gt 0 ]; do
+        if mysql -h${MYSQL_HOST:-mysql} -P${MYSQL_PORT:-3306} -u${MYSQL_USER:-yearning} -p${MYSQL_PASSWORD} -e "SELECT 1" >/dev/null 2>&1; then
+            echo "MySQL服务已就绪"
+            return 0
+        fi
+        echo "等待MySQL... (剩余 $retries 次尝试)"
+        sleep 2
+        retries=$((retries - 1))
+    done
+    echo "MySQL服务连接超时"
+    exit 1
+}
+
+# 生成配置文件
+generate_config() {
+    echo "生成配置文件..."
+
+    # 如果配置文件不存在，从模板创建
+    if [ ! -f /app/conf/yearning.conf ]; then
+        cp /app/conf/conf.toml.template /app/conf/yearning.conf
+
+        # 替换配置变量
+        sed -i "s/Host = \"127.0.0.1\"/Host = \"${MYSQL_HOST:-mysql}\"/" /app/conf/yearning.conf
+        sed -i "s/Port = \"3306\"/Port = \"${MYSQL_PORT:-3306}\"/" /app/conf/yearning.conf
+        sed -i "s/User = \"root\"/User = \"${MYSQL_USER:-yearning}\"/" /app/conf/yearning.conf
+        sed -i "s/Password = \"xxxxxxx\"/Password = \"${MYSQL_PASSWORD}\"/" /app/conf/yearning.conf
+        sed -i "s/Db = \"Yearning_go\"/Db = \"${MYSQL_DB:-yearning}\"/" /app/conf/yearning.conf
+        sed -i "s/SecretKey = \"dbcjqheupqjsuwsm\"/SecretKey = \"${SECRET_KEY:-dbcjqheupqjsuwsm}\"/" /app/conf/yearning.conf
+        sed -i "s/RpcAddr = \"127.0.0.1:50001\"/RpcAddr = \"${RPC_ADDR:-juno:50001}\"/" /app/conf/yearning.conf
+        sed -i "s/LogLevel = \"debug\"/LogLevel = \"${LOG_LEVEL:-info}\"/" /app/conf/yearning.conf
+        sed -i "s/Lang = \"en_US\"/Lang = \"${LANG:-zh_CN}\"/" /app/conf/yearning.conf
+
+        # OIDC配置
+        if [ "${OIDC_ENABLE:-false}" = "true" ]; then
+            sed -i "s/Enable = false/Enable = true/" /app/conf/yearning.conf
+            sed -i "s/ClientId = \"yearning\"/ClientId = \"${OIDC_CLIENT_ID}\"/" /app/conf/yearning.conf
+            sed -i "s/ClientSecret = \"fefehelj23jlj22f3jfjdfd\"/ClientSecret = \"${OIDC_CLIENT_SECRET}\"/" /app/conf/yearning.conf
+            sed -i "s|AuthUrl = \".*\"|AuthUrl = \"${OIDC_AUTH_URL}\"|" /app/conf/yearning.conf
+            sed -i "s|TokenUrl = \".*\"|TokenUrl = \"${OIDC_TOKEN_URL}\"|" /app/conf/yearning.conf
+            sed -i "s|UserUrl = \".*\"|UserUrl = \"${OIDC_USER_URL}\"|" /app/conf/yearning.conf
+            sed -i "s|RedirectUrL = \".*\"|RedirectUrL = \"${OIDC_REDIRECT_URL}\"|" /app/conf/yearning.conf
+        fi
+    fi
+
+    echo "配置文件已生成: /app/conf/yearning.conf"
+}
+
+# 初始化数据库（如果需要）
+init_database() {
+    if [ "${SKIP_INIT:-false}" != "true" ]; then
+        echo "检查数据库初始化状态..."
+
+        # 检查是否已初始化
+        if ! mysql -h${MYSQL_HOST:-mysql} -P${MYSQL_PORT:-3306} -u${MYSQL_USER:-yearning} -p${MYSQL_PASSWORD} ${MYSQL_DB:-yearning} -e "SELECT 1 FROM core_accounts LIMIT 1" >/dev/null 2>&1; then
+            echo "数据库未初始化，开始初始化..."
+            echo 'yes' | ./yearning install --config conf/yearning.conf
+            echo "数据库初始化完成"
+        else
+            echo "数据库已初始化，跳过初始化步骤"
+        fi
+    fi
+}
+
+# 主函数
+main() {
+    echo "=========================================="
+    echo "     Yearning SQL审计平台启动中..."
+    echo "=========================================="
+
+    # 等待依赖服务
+    wait_for_mysql
+
+    # 生成配置
+    generate_config
+
+    # 初始化数据库
+    init_database
+
+    # 启动应用
+    echo "启动Yearning服务..."
+    exec ./yearning run --config conf/yearning.conf
+}
+
+# 执行主函数
+main "$@"
+EOF
+
+# 设置权限
+RUN chmod +x /app/entrypoint.sh && \
+    chown -R yearning:yearning /app
+
+# 切换到应用用户
+USER yearning
+
+# 暴露端口
+EXPOSE 8000
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8000/fetch || exit 1
+
+# 启动命令
+ENTRYPOINT ["/app/entrypoint.sh"]

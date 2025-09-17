@@ -1,12 +1,13 @@
-package main
+package migration
 
 import (
 	"Yearning-go/src/model"
 	"encoding/json"
 	"fmt"
+	"strconv"
+
 	"github.com/cookieY/yee/logger"
 	"github.com/google/uuid"
-	"strconv"
 )
 
 type originOther struct {

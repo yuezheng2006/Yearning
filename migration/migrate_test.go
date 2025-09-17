@@ -1,4 +1,4 @@
-package main
+package migration
 
 import (
 	"Yearning-go/src/model"

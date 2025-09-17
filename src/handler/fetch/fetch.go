@@ -67,11 +67,14 @@ func FetchQueryStatus(c yee.Context) (err error) {
 func FetchSource(c yee.Context) (err error) {
 	u := new(_FetchBind)
 	if err := c.Bind(u); err != nil {
-		fmt.Println(err)
+		fmt.Println("Bind error:", err)
 		return c.JSON(http.StatusOK, common.ERR_COMMON_TEXT_MESSAGE(i18n.DefaultLang.Load(i18n.ER_REQ_BIND)))
 	}
+	// 临时调试信息
+	fmt.Printf("DEBUG: Received request: %+v\n", u)
 	if reflect.DeepEqual(u, _FetchBind{}) {
-		return
+		fmt.Println("DEBUG: Empty _FetchBind, returning empty response")
+		return c.JSON(http.StatusOK, common.SuccessPayload([]string{}))
 	}
 
 	var grained model.CoreGrained
@@ -233,6 +236,7 @@ func FetchSQLTest(c yee.Context) (err error) {
 	}
 	var rs []engine.Record
 	if client := calls.NewRpc(); client != nil {
+		// 使用外部Juno服务
 		if err := client.Call("Engine.Check", engine.CheckArgs{
 			SQL:      u.SQL,
 			Schema:   u.Database,
@@ -250,8 +254,25 @@ func FetchSQLTest(c yee.Context) (err error) {
 			return c.JSON(http.StatusOK, common.ERR_COMMON_MESSAGE(err))
 		}
 		return c.JSON(http.StatusOK, common.SuccessPayload(rs))
+	} else {
+		// 使用内置SQL检测引擎
+		checker := engine.NewBuiltinChecker()
+		rs = checker.Check(engine.CheckArgs{
+			SQL:      u.SQL,
+			Schema:   u.Database,
+			IP:       s.IP,
+			Username: s.Username,
+			Port:     s.Port,
+			Password: enc.Decrypt(model.C.General.SecretKey, s.Password),
+			CA:       s.CAFile,
+			Cert:     s.Cert,
+			Key:      s.KeyFile,
+			Kind:     u.Kind,
+			Lang:     model.C.General.Lang,
+			Rule:     *rule,
+		})
+		return c.JSON(http.StatusOK, common.SuccessPayload(rs))
 	}
-	return c.JSON(http.StatusOK, common.ERR_COMMON_MESSAGE(fmt.Errorf("client is nil")))
 }
 
 func FetchOrderDetailList(c yee.Context) (err error) {
