@@ -123,15 +123,22 @@ frontend-dev/
 conf.toml
 
 # 部署和构建相关
-yearning-deployment-package/
 *-deployment/
 playwright-env/
 mac-test-deployment/
+
+# 部署包中的二进制文件（保留文档和脚本）
+yearning-deployment-package/*.tar.gz
+yearning-deployment-package/*.zip
+yearning-deployment-package/*.sha256
+yearning-deployment-package/mac-test-deployment/
 
 # 临时文件和构建产物
 Yearning-*
 yearning-linux
 Dockerfile.simple
+# 全局二进制文件规则（但不影响部署包内的文档）
+/yearning
 *.tar.gz
 *.zip
 *.sha256

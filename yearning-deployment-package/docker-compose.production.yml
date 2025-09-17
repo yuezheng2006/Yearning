@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  # MySQL数据库服务
+  mysql:
+    image: mysql:5.7
+    container_name: yearning-mysql-working
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: yearning
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --bind-address=0.0.0.0
+    ports:
+      - "3306:3306"
+    volumes:
+      - yearning_mysql_working:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      timeout: 10s
+      retries: 10
+      interval: 10s
+    restart: always
+    networks:
+      - yearning-working
+
+  # Yearning后端服务 - 在容器内编译
+  yearning:
+    image: golang:1.21-alpine
+    container_name: yearning-backend-working
+    working_dir: /app
+    environment:
+      CGO_ENABLED: 1
+      GOOS: linux
+      MYSQL_ADDR: mysql:3306
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_DB: yearning
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - yearning-working
+    volumes:
+      - .:/app
+    command: |
+      sh -c "
+        # 安装编译依赖
+        apk add --no-cache git gcc musl-dev bash &&
+        # 等待MySQL完全启动
+        sleep 15 &&
+        # 创建配置文件
+        cp conf.toml.template conf.toml &&
+        # 更新配置文件使用Docker服务名
+        sed -i 's/Host = \"127.0.0.1\"/Host = \"mysql\"/' conf.toml &&
+        sed -i 's/Port = \"3306\"/Port = \"3306\"/' conf.toml &&
+        sed -i 's/User = \"root\"/User = \"root\"/' conf.toml &&
+        sed -i 's/Password = \"xxxxxxx\"/Password = \"root\"/' conf.toml &&
+        sed -i 's/Db = \"Yearning_go\"/Db = \"yearning\"/' conf.toml &&
+        sed -i 's/RpcAddr = \"127.0.0.1:50001\"/RpcAddr = \"juno:50001\"/' conf.toml &&
+        sed -i 's/Lang = \"en_US\"/Lang = \"zh_CN\"/' conf.toml &&
+        # 显示配置文件内容确认
+        echo '=== 配置文件内容 ===' &&
+        cat conf.toml &&
+        echo '==================' &&
+        # 下载Go模块依赖
+        go mod download &&
+        # 编译应用
+        go build -o yearning-linux main.go &&
+        # 初始化数据库
+        echo 'yes' | ./yearning-linux install --config conf.toml &&
+        # 启动服务
+        ./yearning-linux run --config conf.toml
+      "
+
+  # Juno SQL检测服务
+  juno:
+    image: yeelabs/juno:latest
+    container_name: yearning-juno-working
+    environment:
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_ADDR: mysql:3306
+      MYSQL_DB: yearning
+    ports:
+      - "50001:50001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - yearning-working
+    restart: unless-stopped
+
+volumes:
+  yearning_mysql_working:
+    driver: local
+
+networks:
+  yearning-working:
+    driver: bridge
