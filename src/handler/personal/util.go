@@ -8,10 +8,11 @@ import (
 	"Yearning-go/src/lib/factory"
 	"Yearning-go/src/model"
 	"errors"
-	"github.com/cookieY/yee/logger"
-	"gorm.io/gorm"
 	"log"
 	"time"
+
+	"github.com/cookieY/yee/logger"
+	"gorm.io/gorm"
 )
 
 func autoTask(order *model.CoreSqlOrder, length int) {

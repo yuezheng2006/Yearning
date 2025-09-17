@@ -9,11 +9,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/cookieY/sqlx"
-	"github.com/cookieY/yee/logger"
 	"strconv"
 	"strings"
 	"unsafe"
+
+	"github.com/cookieY/sqlx"
+	"github.com/cookieY/yee/logger"
 )
 
 const (
@@ -64,13 +65,13 @@ func (q *QueryDeal) PreCheck(insulateWordList string) error {
 		// fallback到内置引擎进行查询预检
 		// 在内置模式下，简化处理：直接将SQL添加到执行队列
 		rs = []engine.Record{{
-			SQL:               q.Ref.Sql,
-			Status:            "通过",
-			Level:             0,
-			InsulateWordList:  strings.Split(insulateWordList, ","),
+			SQL:              q.Ref.Sql,
+			Status:           "通过",
+			Level:            0,
+			InsulateWordList: strings.Split(insulateWordList, ","),
 		}}
 	}
-	
+
 	for _, i := range rs {
 		if i.Error != "" {
 			return errors.New(i.Error)
