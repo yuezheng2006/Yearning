@@ -121,3 +121,34 @@ dist/
 frontend-dev/
 *.log
 conf.toml
+
+# 部署和构建相关
+yearning-deployment-package/
+*-deployment/
+playwright-env/
+mac-test-deployment/
+
+# 临时文件和构建产物
+Yearning-*
+yearning-linux
+Dockerfile.simple
+*.tar.gz
+*.zip
+*.sha256
+
+# 脚本和配置文件副本
+docker-compose.*.yml
+build-*.sh
+deploy-*.sh
+*-test.sh
+
+# Python环境
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node.js (如果有前端开发)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

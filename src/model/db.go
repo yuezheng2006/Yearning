@@ -47,11 +47,15 @@ func initConfig(cPath string) {
 	}
 	var jwt = os.Getenv("SECRET_KEY")
 	var lang = os.Getenv("Y_LANG")
+	var rpcAddr = os.Getenv("RPC_ADDR")
 	if jwt != "" {
 		C.General.SecretKey = jwt
 	}
 	if lang != "" {
 		C.General.Lang = lang
+	}
+	if rpcAddr != "" {
+		C.General.RpcAddr = rpcAddr
 	}
 	i18n.MakeBuild(C.General.Lang)
 	DefaultLogger = logger.LogCreator(int(TransferLogLevel()))

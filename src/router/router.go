@@ -75,6 +75,7 @@ func SuperRecorderGroup() yee.HandlerFunc {
 
 func AddRouter(e *yee.Core) {
 	e.POST("/login", login.UserGeneralLogin)
+	e.POST("/logout", login.UserLogout)
 	e.POST("/register", login.UserRegister)
 	e.GET("/fetch", login.UserReqSwitch)
 	e.GET("/lang", login.SystemLang)

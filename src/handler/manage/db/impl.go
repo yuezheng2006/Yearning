@@ -7,6 +7,8 @@ import (
 	"Yearning-go/src/lib/factory"
 	"Yearning-go/src/model"
 	"encoding/json"
+	"errors"
+
 	"github.com/google/uuid"
 	drive "gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -21,9 +23,19 @@ type CommonDBPost struct {
 }
 
 func ConnTest(u *model.CoreDataSource) error {
+	// 智能密码处理：先尝试解密，如果解密失败则使用原密码（明文）
+	ps := enc.Decrypt(model.C.General.SecretKey, u.Password)
+	if ps == "" {
+		// 解密失败，可能是明文密码，直接使用原密码
+		ps = u.Password
+		if ps == "" {
+			return errors.New("连接失败,密码为空！")
+		}
+	}
+	
 	dsn, err := model.InitDSN(model.DSN{
 		Username: u.Username,
-		Password: u.Password,
+		Password: ps,
 		Host:     u.IP,
 		Port:     u.Port,
 		DBName:   "",

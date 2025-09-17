@@ -66,13 +66,14 @@ func UserLdapLogin(c yee.Context) (err error) {
 			c.Logger().Error(tokenErr.Error())
 			return
 		}
-		dataStore := map[string]interface{}{
-			"token":     token,
-			"real_name": account.RealName,
-			"user":      u.Username,
-			"is_record": account.IsRecorder,
-		}
-		return c.JSON(http.StatusOK, common.SuccessPayload(dataStore))
+			
+			dataStore := map[string]interface{}{
+				"token":     token,
+				"real_name": account.RealName,
+				"user":      u.Username,
+				"is_record": account.IsRecorder,
+			}
+			return c.JSON(http.StatusOK, common.SuccessPayload(dataStore))
 	}
 	return c.JSON(http.StatusOK, common.ERR_COMMON_MESSAGE(errors.New(i18n.DefaultLang.Load(i18n.ER_LOGIN))))
 }
@@ -99,6 +100,7 @@ func UserGeneralLogin(c yee.Context) (err error) {
 				c.Logger().Error(tokenErr.Error())
 				return err
 			}
+			
 			dataStore := map[string]interface{}{
 				"token":     token,
 				"real_name": account.RealName,
@@ -111,6 +113,12 @@ func UserGeneralLogin(c yee.Context) (err error) {
 	}
 	return c.JSON(http.StatusOK, common.ERR_COMMON_MESSAGE(errors.New(i18n.DefaultLang.Load(i18n.ER_LOGIN))))
 
+}
+
+func UserLogout(c yee.Context) (err error) {
+	return c.JSON(http.StatusOK, common.SuccessPayload(map[string]interface{}{
+		"message": "登出成功",
+	}))
 }
 
 func UserRegister(c yee.Context) (err error) {

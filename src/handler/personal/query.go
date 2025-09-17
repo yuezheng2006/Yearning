@@ -173,9 +173,14 @@ func SocketQueryResults(c yee.Context) (err error) {
 			core := new(queryCore)
 			var u model.CoreDataSource
 			model.DB().Where("source_id =?", args.SourceId).First(&u)
+			// 临时跳过密码解密，用于调试
+			password := u.Password
+			if decrypted := enc.Decrypt(model.C.General.SecretKey, u.Password); decrypted != "" {
+				password = decrypted
+			}
 			dsn, err := model.InitDSN(model.DSN{
 				Username: u.Username,
-				Password: enc.Decrypt(model.C.General.SecretKey, u.Password),
+				Password: password,
 				Host:     u.IP,
 				Port:     u.Port,
 				CA:       u.CAFile,
