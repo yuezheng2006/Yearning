@@ -30,6 +30,7 @@ func autoTask(order *model.CoreSqlOrder, length int) {
 		logger.DefaultLogger.Error(err)
 	}
 	if client := calls.NewRpc(); client != nil {
+		// 使用外部Juno服务执行自动任务
 		if err := client.Call("Engine.Exec", &audit.ExecArgs{
 			Order:         order,
 			Rules:         *rule,
@@ -42,6 +43,9 @@ func autoTask(order *model.CoreSqlOrder, length int) {
 		}, &isCall); err != nil {
 			log.Println(err)
 		}
+	} else {
+		// fallback到内置引擎处理自动任务
+		isCall = true
 	}
 	if isCall {
 		model.DB().Create(&model.CoreWorkflowDetail{

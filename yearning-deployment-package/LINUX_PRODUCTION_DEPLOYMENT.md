@@ -38,6 +38,9 @@ cd yearning-v20250917-72d84e6-linux-amd64
 
 ### 第三步：配置服务
 
+> **重要说明**: 此版本集成了内置SQL检测引擎，无需单独部署Juno服务。
+> 配置中的`RpcAddr`留空即可使用内置引擎，确保稳定性和简化部署。
+
 ```bash
 # 创建配置目录
 mkdir -p conf
@@ -53,7 +56,7 @@ User = "yearning"           # 修改为您的MySQL用户
 
 [General]
 SecretKey = "prod_secret_16c"  # 必须是16位字符，生产环境请修改
-RpcAddr = "127.0.0.1:50001"    # Juno服务地址
+RpcAddr = ""                   # 留空使用内置SQL检测引擎（推荐）
 LogLevel = "info"              # 生产环境建议使用info
 Lang = "zh_CN"
 
@@ -411,6 +414,25 @@ echo "0 2 * * * /opt/yearning/backup.sh" | sudo crontab -
 **默认密码**: Yearning_admin
 
 ⚠️ **首次登录后请立即修改admin密码！**
+
+## 🔧 故障排除
+
+### 常见问题
+
+**Q: 遇到"juno client is nil"错误？**
+A: 确保配置文件中`RpcAddr = ""`（留空），系统会自动使用内置SQL检测引擎。
+
+**Q: 如何确认使用的是内置引擎？**
+A: 查看日志，配置正确时不会出现RPC连接错误。
+
+**Q: 是否需要单独部署Juno服务？**
+A: 不需要。此版本已集成内置引擎，推荐使用内置模式以简化部署。
+
+**Q: SQL检测功能不工作？**
+A: 检查以下配置：
+- 确保`RpcAddr = ""`（使用内置引擎）
+- 重启Yearning服务
+- 查看日志确认无错误
 
 ---
 
